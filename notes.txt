@@ -1,0 +1,11 @@
+source ~/anaconda3/bin/activate root
+anaconda-navigator
+
+jupyter notebook
+
+conda config --set auto_activate_base true|false
+
+kaggle competitions download -c digit-recognizer
+
+pip install p2j
+p2j prog.py
