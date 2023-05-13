@@ -3,6 +3,7 @@
 # For example, here's several helpful packages to load
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+from sklearn.model_selection import train_test_split
 
 # Input data files are available in the read-only "../input/" directory
 # For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
@@ -48,19 +49,42 @@ for num in range(0, 25):
     plt.subplot(5, 5, num + 1)
     np_grid = data_train.iloc[num, 1:].to_numpy().reshape(28, 28)
     plt.imshow(np_grid, interpolation="none", cmap=plt.cm.binary)
-    plt.axis('off')
+    plt.axis("off")
 plt.tight_layout()
 plt.show()
 
 #raise
 #print(type(data_train))
 
-#x = data_train.drop(columns="label").to_numpy().reshape(-1, 28, 28, 1)
-#y = data_train["label"]
+x = data_train.drop(columns="label").to_numpy().reshape(-1, 28, 28, 1)
+# x.shape
+# (42000, 28, 28, 1)
+y = data_train["label"]
+# y.shape
+# (42000, )
 
-#print(x[0])
+x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.10, shuffle=True)
 
-#X_train, x_val, y_train, y_val = train_test_split(X,y, test_size=0.10, shuffle=True)
+model_predictions = model.predict(x_test, verbose=1)
 
+# create model
+classes = 10
+
+model = tf.keras.Sequential([
+    # To rescale an input in the [0, 255] range to be in the [0, 1] range, you would pass scale=1./255
+    tf.keras.layers.Rescaling(1. / 255),
+    
+    tf.keras.layers.Conv2D(20, (3, 3), padding="same", activation="relu", input_shape=(28, 28, 1)),
+    tf.keras.layers.MaxPooling2D((2, 2), strides=2),
+    tf.keras.layers.Conv2D(32, (3, 3), padding="same", activation="relu"),
+    tf.keras.layers.MaxPooling2D((2, 2), strides=2),
+    tf.keras.layers.Conv2D(32, (3, 3), padding="same", activation="relu"),
+    tf.keras.layers.MaxPooling2D((2, 2), strides=2),
+    
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(128, activation="relu"),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(classes, activation="softmax")
+])
 
 
