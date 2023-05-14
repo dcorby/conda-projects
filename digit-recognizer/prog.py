@@ -87,4 +87,28 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(classes, activation="softmax")
 ])
 
+# compile model
+model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+history = model.fit(x_train, y_train, batch_size=32, validation_data=(x_val, y_val), epochs=10, verbose=1, steps_per_epoch=(train_rows/32))
 
+# visualize the data
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(EPOCHS)
+
+plt.figure(figsize=(8,8))
+plt.subplot(1,2,1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Traing and Validation Accuracy')
+
+plt.subplot(1,2,2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Traing and Validation Loss')
+plt.show()
