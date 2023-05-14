@@ -4,6 +4,7 @@
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 
 # Input data files are available in the read-only "../input/" directory
 # For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
@@ -65,8 +66,6 @@ y = data_train["label"]
 
 x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.10, shuffle=True)
 
-model_predictions = model.predict(x_test, verbose=1)
-
 # create model
 classes = 10
 
@@ -88,27 +87,38 @@ model = tf.keras.Sequential([
 ])
 
 # compile model
+epochs = 10
+train_rows, _s = data_train.shape
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-history = model.fit(x_train, y_train, batch_size=32, validation_data=(x_val, y_val), epochs=10, verbose=1, steps_per_epoch=(train_rows/32))
+history = model.fit(x_train, y_train, batch_size=32, validation_data=(x_val, y_val), epochs=epochs, verbose=1, steps_per_epoch=(train_rows/32))
 
 # visualize the data
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-epochs_range = range(EPOCHS)
-
-plt.figure(figsize=(8,8))
-plt.subplot(1,2,1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(range(epochs), history.history["accuracy"], label="Training Accuracy")
+plt.plot(range(epochs), history.history["val_accuracy"], label="Validation Accuracy")
+plt.legend(loc="lower right")
 plt.title('Traing and Validation Accuracy')
 
-plt.subplot(1,2,2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Traing and Validation Loss')
+plt.subplot(1, 2, 2)
+plt.plot(range(epochs), history.history["loss"], label="Training Loss")
+plt.plot(range(epochs), history.history["val_loss"], label="Validation Loss")
+plt.legend(loc="upper right")
+plt.title("Training and Validation Loss")
 plt.show()
+
+# format test data
+x_test = data_test.values.reshape(-1, 28, 28, 1)
+
+# predictions
+model_predictions = model.predict(x_test, verbose=1)
+
+# obtain predicted class labels
+label_predictions = np.argmax(model_predictions, axis=-1)
+
+# produce the submission
+submission = pd.read_csv(f"{input_dir}/sample_submission.csv")
+submission["Label"] = list(label_predictions)
+submission.head(10)
+submission.to_csv("submission.csv", index=False)
+
